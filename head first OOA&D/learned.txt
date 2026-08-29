@@ -1,0 +1,228 @@
+======================================================
+first chapter: ??
+
+UML classes don't show constructors.
+
+UML also most of times, does not show whether attributes are private or public.
+
+enums are a great way to get not only type safety, but value safety; you can avoid getting bad data for anything that has a standard range or set of legal values.
+
+If you’ve got an object that is being used with no-value or null properties often, you’ve probably got an object doing more than one job.
+
+The idea behind encapsulation is to protect information in one part of your application from the other parts of your application. In its simplest form, you can protect the data in your class from the rest of your app by making that data private.
+
+great software steps:
+	1-  Make sure your software does what the customer wants it to do.
+	2- Apply basic OO principles to add flexibility.
+	3- Strive for a maintainable, reusable design.
+
+======================================================
+second chapter: requirements
+
+A requirement is usually a single thing, and you can test that thing to make sure you’ve actually fulfilled the requirement.
+
+a use case can have an alternate path where things go wrong and we fix them by some additional steps.
+
+every step in a use case must be satisfied with a reuqirement or N/A if don't need any requirement. -> use case helps understand requirements and reqs helps code.
+
+======================================================
+third chapter: requirements change
+
+Requirements always change. If you’ve got good use cases, though, you can usually change your software quickly to adjust to those new requirements.
+
+code duplication means we need encapsulation or signals missing abstraction. think thoroughly where should the function go before adding it to a class.
+code duplication = violation of DRY principle (Don't Repeat Yourself)
+
+======================================================
+fourth chapter: analysis
+
+Each use case should detail one particular user goal.
+
+Delegation shields your objects from implementation changes to other objects in your software.
+
+the nouns in a use case are usually the classes you need to write and focus on in your system and The verbs in your use case are usually the methods of the objects in your system.(not all of them will be classes, but almost all classes will be nouns which are used in use case) -> textual analysis
+
+note: Use cases are meant to be understood by you, your managers, your customers, and other programmers.
+
+======================================================
+fifth chapter: good design = flexible software
+
+UML: name of class in italic means the class is abstract.
+
+UML: line with diamond means aggregation -> special form of association, one thing is made up of another thing.
+
+"aggregation" means part can exist without the whole(shown with white diamond in UML, example: team and player) but "composition" means part cannot exist without the whole(shown with black diamond in UML, example: house and room)
+
+an example of "encapsulate what varies": (page 226)
+"paint()" method of class "Painter" can have different styles, so we encapsulate it in class "PaintStyle" and add method "setPaintStyle(PaintStyle)" to class "Painter".
+
+When you see a class that has more than one reason to change, it is probably trying to do too many things. See if you can break up the functionality into multiple classes, where each individual class does only one thing—and therefore has only one reason to change.
+
+=== second part
+
+Don’t use inheritance to represent differences in data(attributes). Use inheritance only when there is behavioral polymorphism.
+
+Ask: “Do these subclasses behave differently, or do they just contain different data?”
+If they behave differently → inheritance is okay.
+If they only have different fields → avoid inheritance.
+
+in the example of InstrumentSpec class, because the variability was in data, not in behavior, the design resulted in explosion of subclasses which made us realize that inheritance was not the right tool.
+if inheritance is not the right tool, the number one substitute is composition + delegation, or strategy design pattern.
+
+behvaior varies -> Inheritance(abstract classes), Interfaces, strategy design pattern
+data varies -> compositions, maps
+
+"class explosion" usually points to:
+	1- not realizing one axis of change (bridge pattern)
+	2- using inheritance for change in fields, not behavior
+and the cure for both of these is "using composition instead of inheritance".
+
+=> that's one reason for "favor composition over inheritance" principle, because with composition, you cannot miss, even if the variability is in data! (inheritance also creates tight couling, which composition does not)
+
+so when we try to respect the principle "encapsulate what varies", we must first identify "what kind of thing is varying":
+	variation is in behavior -> inheritance or interfaces (polymorphism)
+	variation is in data/fields -> composition (objects, maps, configs)
+	variation is in small, fixed set of categories -> enums
+	variation is in mutiple dimensions -> bridge design pattern
+
+A cohesive class does one thing really well and does not try to do or be something else. -> Look through the methods of your classes-do they all relate to the name of your class? If you have a method that looks out of place, it might belong in another class.
+
+we can look at "cohesion" as a measure for single responsibility.
+
+======================================================
+sixth chapter: solving really big problems
+
+Get features from the customer, and then figure out the requirements you need to implement those features -> a feature might result in several requirements.
+
+the first system which might help in understanding a big system is find "commonality" (find thing that are similar to our system) and "variability" (find things that are not like our system).
+
+use cases expose us to lots of details so they don't always help seeing the big picture.
+a better substitute for use case at high-level description is use case diagram.
+
+level of detail: requirement > feature
+			^	^
+			|	|
+			v	v
+level of detail: use case > use case diagram
+
+you could say that one use case includes another, or that one use case extends another. That’s what the <<include>> and <<extend>> keywords mean.
+
+if a feature does not go along with an item on use case diagram, it might mean that you have not discovered some actor which has its own items on use case diagram.
+
+An actor is anything that interacts with your system, but isn’t part of the system.
+
+"domain analysis" is understanding the "problem world", not the solution. it's understanding customer's world, not the system.
+
+======================================================
+seventh chapter: bringing order to chaos
+
+Bonus Design Principle: Pull out setup code into its own method, so it doesn’t make the rest of your code so confusing to read.
+
+note: use case describes "what the user want to achieve", not "how the system works", for example, it'd be idiomatic to have use case for "validate password" as user will never want to do that, though he might want to login. -> every use case must describe a goal an actor has.
+
+three Qs:
+	1- is the feature core to the system? can you imagine the system without it?
+	2- what the heck does the feature mean?
+	3- how the heck to do it?
+
+the goal is to "reduce risk", by choosing the right parts of the system to implement, one after the other.
+
+======================================================
+eighth chapter: originality is overrated
+
+When you’re trying to avoid duplicate code, you’re really trying to make sure that you only implement each feature and requirement in your application one single time. (DRY peinciple) -> so the requirements must not have duplication also. DRY applies to them as well.
+
+SRP are DRY are related, and often appear together. DRY is about putting a piece of functionality in a single place, such as a class; SRP is about making sure that a class does only one thing, and that it does it well.
+
+a hint on "is SRP respected in this class?" is doing "the <CLASS> <METHOD> itself." for each method. if a method does not make sense, it does not belong to this class. (this approach is not waterproof though, sometimes you need to make judgement calls.)
+keep in mind that it is about "behavior", not the actual world. for example "the car starts itself" does not make sense in real world, since the driver starts the car. but the behavior of being started belongs to car, so it makes sense to have car.start() as a method.
+
+The LSP is all about well-designed inheritance. When you inherit from a base class, you must be able to substitute your subclass for that base class without things going terribly wrong. Otherwise, you’ve used inheritance incorrectly!
+
+======================================================
+nineth chapter: the software is still for the customer
+
+development:
+	feature driven: focuses on implementing different features one by one
+	use case driven: focuses on implementing flows through the app, one by one. Works particularly well on transactional systems, where the system is largely defined by lengthy, complicated processes.
+	test case driven: the idea of writing test cases, and then writing the code that will pass the test, is the core idea behind test driven development.
+
+when having variation in data/fields, we can use maps.
+what if there are some fields which are common among subclasses? we have two choices:
+	1- common fields outside map: clear structure, forces subclasses to have value for common variables. but has the risk of violation of DRY principle since common values can be accessed two different ways:
+		getId()
+		getName()
+		getProperty("id")
+		getProperty("name")
+	2- everything in map: more uniform interface but has weaker structure.
+
+in a module, instead of retuning "NULL", we can use "defensive programming" and throw an exception. that way, the people who use our module will never get to problems like theModule.getSomething().callSomething() -> null de-reference if getSomething() returns null
+of course, "defensive programming" can be put to use on the other side too. the programmer might check the return value of the module for being null, having length of greater than zero and putting it all under a catch block.
+
+we have two types of exception in java, checked an unchecked exceptions. with checked exception, the programmer must write a try/catch block for it but unchecked exceptions are inherited from RuntimeException class and does not need to be handled explicitly.
+when should we use each?
+	checked exception -> when recovery from that error is meaningful and the error is not the programmers fault. (example: IOException)
+	unchecked exception -> when programmer violated a precondition and recovery is not realistic since system is in invalid state. (example: NullPtrException)
+
+why shouldn't all exceptions be checked? because 1- most exceptions are not recoverable and 2- it encourage the worst anti-pattern, catch-and-ignore which hides bugs and makes debugging impossible.
+
+runtime exceptions are flexible, which is good because a robust caller may choose to catch the exception, where a quick prototype caller might ignore it.
+
+checked exceptions are mostly environmental(disk fault, internet outage, etc.) whereas almost all runtimeExceptions are programmers fault.
+
+======================================================
+tenth chapter: putting it all together
+
+note: a use case diagram is all about
+	1- who uses the system?
+	2- what do they want it to do?
+	it does not describe how the internal of the system works.
+
+note: each "use case" in "use case diagram" must relate to one or more features in feature list.
+Use cases describe how users use the system; features describe what the system must do internally. Use cases depend on features, but features are not use cases.
+
+Every feature in your system will be at least a part of addressing one or more uses cases in your use case diagram. But that doesn’t mean that the use case has to actually directly use that feature. Lots of times, a feature makes it possible for a use case to function without being directly used by the use case itself.
+
+note: SRP must be used when we are trying to break our problem into different modules(folders) as well. each folder must have a single resp.
+
+note: use cases are supposed to be more descriptive of the event we want to happen. you shouldn't cut corners. you should write it in an algrothmic way, what steps need to be looped, what conditions msut be met in order to proceed, etc.
+
+it is a good practice to add validation steps to use case. 
+
+in textual analysis, we need to keep in mind that actors don't need to become classes since they are out of the system.
+
+When you override equals() in Java, you should usually also override hashCode() to ensure correct comparisons.
+
+Use custom classes internally, but expose only the minimal API needed—prefer hiding unnecessary classes, not eliminating them. -> this way, Classes that the clients don’t interact with can be changed with minimal client code being affected.
+
+======================================================
+appendix i
+
+IS-A and HAS-A are more like indicator, and they might break down in certain situations, example: Square is a Rectangle, but using inheritance results in violation of LSP. ->
+Use inheritance when one object behaves like another, rather than just when the IS-A relationship applies.
+
+we should create a class for an external actor only when the system need to remember, manage or enforce rules about the actor. -> (TourGuide doesn't need class in RouteFinder.)
+
+use cases have many formats. it's all about explaining the flow of the system though.
+
+Gas factory anti pattern: over-engineered, hyper abstract, pattern heavy design. It’s like building an entire gas‑refining industrial complex just to boil a cup of water.
+	Valid complexity: Essential to the domain, Reflects real rules (banking, aviation, healthcare), Required by real constraints, Adds clarity or safety
+	Gas Factory complexity: Self‑inflicted, Not needed for the domain, Adds no business value, Exists “just because”
+
+You can use CRC cards to make sure your classes follow the SRP.
+
+SRP works at method-level as well, for example:
+	public double getDisabilityAmount() {
+	// Check for eligibility
+	if (seniority < 2)
+	return 0;
+	if (monthsDisabled > 12)
+	return 0;
+	if (isPartTime)
+	return 0;
+	// Calculate disability amount and return it
+	}
+is wrong since it is doing two things: 1- checks for eligibility and 2- calculating disability
+so we need to define a function isEligibleForDisability() and use it here.
+
+
