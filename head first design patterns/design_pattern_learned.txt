@@ -1,0 +1,466 @@
+principles:
+	encapsulate what varies. -> strategy pattern
+	program to in interface, not an implementation. -> strategy pattern
+	favor composition over inheritance. -> strategy pattern
+	Strive for loosely coupled designs between objects that interact.
+	Classes should be open for extension, but closed for modification. (O in SOLID)
+	Depend upon abstractions. Do not depend upon concrete classes. (D in SOLID) (which was violated in very dependant model of PizzaStore)
+	Least Knowledge Principle: talk only to your immediate friends. (beware of classes which interact with lots of other classes and avoid chain of calls like a.getB().getC().getD().doSomething()) -> facade pattern
+	Hollywood Principle: "don't call us, we will call you" which means that high level modules (those who define policy and business rules) should call low level modules (those who implement details), not vice versa -> template pattern (the algorithm will call the low level modules)
+	Single Responsibility Principle (S in SOLID): this rule is respected in Iterator pattern which delegates Iterating through an aggregate to its iterator and not the aggregator itself.
+================================================================
+first chapter: strategy pattern
+
+(formal definition) strategy design pattern:
+	extract behaviors, create interface , define a family of algorithms,
+	encapsulate each one(in the interface), and make them interchangeable.
+
+can do -> interface
+is a -> abstract class
+
+java to cpp:
+	abstract base class = abstract base class
+	interface = pure abstract base class
+
+In general, think of the Strategy Pattern as a flexible alternative to subclassing; if you use inheritance to define the behavior of a class, then you’re stuck with that behavior even if you need to change it. With Strategy you can change the behavior by composing with a different object. -> if the behavior might change, subclassing is not a good choice.
+
+interfaces are used to SHOW(not implement) behavior/capability, show is stressed because interfaces do not implement anything. they just tell
+you that you are commited to implement this behavior when you `implement` this interface
+
+in java, interfaces are `implemented` and classes are `extended`.
+
+An interface is a deliberately restricted form of an abstract class that represents a capability rather than a concrete base, avoids state and implementation to enable safe multiple inheritance, and allows a class to implement multiple such contracts.
+
+
+we can use these to describe the relation between components and then, figure out whether we should use interface, abstract class, etc.:
+	IS A -> abstract class derivation
+	IMPLEMENTS -> interface implementation
+	HAS A -> Composition
+
+Use Strategy when:
+    there are multiple algorithms for one task
+    you want to switch behavior at runtime
+    you want to remove large conditionals
+    you want extensible algorithms
+
+================================================================
+second chapter: observer pattern
+
+formal definition: defines a one-to-many dependency between objects so that when one object changes state, all its dependents are notified and updated automatically.
+
+we call the publisher the SUBJECT and the subscribers the OBSERVERS.
+
+NOTE: a class which implements an interface can have both extra attributes and extra methods, the restriction of not having any state(attribute) is
+only for the interface itself, not its classes which implement it.
+
+observer can use a push or pull method, with pull method, it will be easier to add new types of data to the info that observers might be interested in. in push method, we need to push all the values to all the observers, but they might not need all of them.
+
+Q: why don't use an abstract class for observer and force-feed subject to observers at costruction time?
+A: becuase multiple problems can happen this way
+	1- no observer can be created which doesn't have an subject at the start.
+	2- observer can only have ONE subject, and it is not mutable (unless we define setter/getter functions as well.)
+	3- this results in "tight coupling" since our abstract interface, will most likely have an attribute like "Subject subject;" which its value will be set at construction-time. this reduces resuability and makes the module harder to use in different projects.
+
+one alternative to passing the Subject in construction time, is using "update(Subject s)" and passing the subject directly to observer when notifying it.
+
+keep in mind that the subject is passed to observers in constructor to:
+	1- call get method on needed values when updated
+	2- it would be easier to unregister if we have a reference to subject in observer
+
+Use Observer when:
+    one object change affects many others
+    you want automatic notifications
+    components should be loosely coupled
+    you are building event-driven systems
+
+================================================================
+third chapter: decorator pattern
+
+formal definition:
+	Attach additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.
+
+in decorator design pattern, it is vital that the decorators have the same type as the objects they are going to decorate. why? ->
+the program can treat the decorated object exactly like the original.
+
+
+so the decorator has two vital aspects:
+	1- it is the same type as the object it is going to decorate.
+	2- it stores a reference to the object it is going to decorate. (reference type is abstract class)
+
+NOTE: When we compose a decorator with a component, we are adding new behavior. We are acquiring new behavior not by inheriting it from a superclass, but by composing objects together.
+
+decorator get its component at its constructor.
+
+in the example in the book, condiments are of type beverage so they can wrap each other recursively. A beverage can have multiple condiments becuase:
+	1- a beverage can have a condiment.
+	2- a beverage with a condiment is still a beverage.
+
+Use Decorator when:
+    behavior must be added dynamically
+    many feature combinations exist
+    subclassing would explode in number
+    you want composable functionality
+
+================================================================
+fourth chapter: factory pattern
+
+formal definition(factory method): defines an interface for creating an object, but lets subclasses decide which class to instantiate. Factory Method lets a class defer instantiation to subclasses.
+formal definition(abstract factory):provides an interface for creating families of related or dependent objects without specifying their concrete classes.
+
+when you use the new operator you are instantiating a concrete class, so that’s an implementation and not an interface.
+note: When you directly instantiate an object, you are depending on its concrete class.
+
+in pizza example, simply moving the string decision making to a new object makes changing of type of pizzas easier, we can only change one place if types of pizzas changes whereas in the first design, we had to change several places.
+
+Factory method is abstract when subclasses must decide what to create.
+
+Q: What’s the advantage of the Factory Method Pattern when you only have one ConcreteCreator?
+A: The Factory Method Pattern is useful if you’ve only got one concrete creator because you are decoupling the implementation of the product from its use. If you add additional products or change a product’s implementation, it will not affect your Creator (because the Creator is not tightly coupled to any ConcreteProduct)
+
+NOTE: abstraction separates what from how. But polymorphism is the mechanism that lets multiple “hows” exist for the same “what”.
+
+Abstract Factory prevents cross-family mixing.
+
+comparison with decorator pattern:
+	Decorator:
+	    adds extra behavior (after the object is created)
+	    works on one object
+
+	Abstract Factory:
+	    creates families of objects
+	    ensures compatibility
+
+	Factory Method:
+	    about creation of one object
+	    let's subclasses decide the concrete class
+
+one downside of abstract factory: the interface needs to change if new products needs to be added.
+
+obj creation:
+	in factory method-> thorugh inheritance
+	in abstract factory-> though object composition
+
+
+================================================================
+fifth chapter: singleton
+
+formal definition: ensures a class has only one instance, and provides a global point of access to it.
+
+other than a single instance, singleton is good for when the instantiation might be resource intensive, and we might not need the variable in the whole exection. since it lazily initiates, it helps with computationaly expensive tasks.
+
+three essential parts:
+	priv. static Singleton Ins;
+	priv. Singletion();
+	pub. static Singleton getIns();
+	
+Note: this simple design is not thread-safe, if we want to use it in multithread applications, we need to change it a bit. we can either:
+	1- use semaphores
+	2- use eager initialization if we are sure that the class will be initialized anyway
+
+singletion violates the principle of "loosely coupled components" and it's likely that if you make a change to the Singleton, you’ll likely have to make a change to every object connected to it. it also violates "Single Responsibility Principle" as it has to both manage its single instance and do its main role in application.
+
+singleton cannot be subclassed becuase:
+	1- constructor is private and if we change it, it isn't singleton anymore.
+	2- static vraibles cannot be overrided.
+and there's no need to subclass it anyway:
+	1- singleton code is trivial to implement to any existing class.
+	2- if your is using singleton heavily, it is probably not a good design.
+
+only in Java, you can use enum as singleton. it is not supported in C++, swift and python becuase in java, enums are class but in most other languages, they are just integers.
+
+
+================================================================
+sixth chapter: command design pattern
+
+formal definition: encapsulates a request as an OBJECT, thereby letting you parameterize other objects with different requests, queue or log requests, and support undoable operations.
+
+allows you to decouple the reuqester of an action from the object that actually performs an action using command objects.
+
+"client" issues a "command" and it passes to "receiver" through "invoker" -> 4 main player
+
+key points:
+	1- "Invoker" interface has a method "setCommand()" and an attribute of type Command
+	2- "Command" interface has a method "execute()" and "ConcreteCommand" has an attribute of type Receiver
+
+usage:
+	you want to turn a request into an object
+	you want to decouple the invoker from the receiver
+	you need undo, queues, logging, or macros.
+
+it actually makes sense for "ConcreteCommand" to get "Receiver" at construction time since it's receiver will not change and a command without a receiver is meaningless.
+
+in this simplest form, each concrete implementation of a command has a receiver and has an execute method which calls one and only one method of the receiver. (one example of execute method calling more than one method on receiver is streo mode, it would call on(), setStreo(), setVolume(), etc.)
+
+
+================================================================
+seventh chapter: adapter and facade pattern
+
+=== adapter
+adapter must implement the target interface and accept and hold adaptee at construction time. ("adapter" wraps "adaptee" to match "target")
+
+formal definition: converts the interface of a class into another interface the clients expect. Adapter lets classes work together that couldn’t otherwise because of incompatible interfaces.
+
+adapters allow clients to make use of new libraries and subsets without changing any code.
+
+=== facade
+makes an interface simpler
+
+formal definition: provides a unified interface to a set of interfaces in a subsystem. Facade defines a higher-level interface that makes the subsystem easier to use.
+
+
+================================================================
+eighth chapter: template pattern
+
+formal definition: defines the skeleton of an algorithm in a method, deferring some steps to subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing the algorithm’s structure.
+
+we can add a "hook()" method at the end of algorithm, and let the subclasses decide to override it if they need to change the behavior of the algorithm just a bit.
+
+"factory method" design pattern can be looked at as a special case of template design pattern since it has predefined algorithm, and subclasses only implement creation of products different way.
+
+The Strategy and Template Method Patterns both encapsulate algorithms, the first by composition and the other by inheritance.
+
+
+================================================================
+nineth chapter: Iterator and composite pattern
+
+=== iterator
+formal definition: rovides a way to access the elements of an aggregate object sequentially without exposing its underlying representation.
+
+note: depending on Interface instead of concrete implementation has the following adavantages:
+	1- runtime change behavior
+	2- respecting open-close principle
+	3- loose coupling
+	4- better testability
+	5- respecting dependency inversion principle
+
+in this pattern, Iterator interface has two methods, "hasNext()" and "next()" and the collection(aggregator) needs to implement the function "createIterator()"
+
+Iterator pattern also places the task of traversal on the iterator object, not on the aggregate, which simplifies the aggregate interface and implementation, and places the responsibility where it should be. -> respects single responsibilty principle
+
+aggregator can also implement "Iterable", which returns and Iterator (the interface) when called on method "iterator()"
+aggregaotr can also implement "Collection" which itself implements "Iterable" and has some more methods that Iterable.
+
+"Iterator" might get the "Iterable" object which traverses into it at construction-time.
+
+note: the list which is stored inside "Iterable" object shouldn't have a getter method so the client understand that if it wants to traverse, it needs to do it using the "Iterator" that we return to it.
+
+note: "Iterator" doesn't use "hasNext()" method in its implementation of "next()" method. it's the duty of client to check for hasNext() first and then use next().
+
+"hasNext()" checks whether current index is valid and "next()" returns current element and advances index.
+
+=== composite
+formal definition: allows you to compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.
+
+two types: transparent composite and safe composite
+transparent composite enforce meaningless implementations inside leaf nodes.
+safe composite enforces exposing client to two different classes. composite object must be of type "Composite" in order to use functions like add() and remove().
+
+instead of using this design pattern, you can use a recursive algorithm with an appropriate data structure like:
+	struct Node {
+		Node* child;
+		Node* Sibling;
+	}
+but this kinda defeats the whole purpose. with composite, we can use polymorphism to treat all object, individual or composite, the same.
+
+Composite = FCNS(First Child Next Sibling) tree expressed with objects instead of pointers
+
+in composite, both the "Leaf" and "Composite" classes extend the abstract class "Component".
+
+
+================================================================
+tenth chapter: state pattern
+
+formal definition: allows an object to alter its behavior when its internal state changes. The object will appear to change its class.
+
+context: the thing which has states
+
+in gumball example, states are dependent on concrete implementation of gumball machine, but the states are meaningless without the actual gumball machine, so there's no point trying to respect dependancy inversion here, since states does not need to be reusable in other projects.
+
+even though "context" must implement every method that "State" must implement, it isn't a good idea for context to inherit from "State" becuase it would complicate the understanding of the project.
+
+you can add default implementation in interface "State" so that you don't have to implement evey invalid action with an error. (see implementation in folder state/)
+
+state pattern is a lot like strategy pattern, they both use composition, store an abstract interface, change the behvaior at runtime.
+the difference is that state pattern actually encourages changing of behavior and has a concrete plan for it (stateA -> stateB -> etc.) but the same is not true for strategy pattern.
+
+
+================================================================
+eleventh chapter: proxy pattern
+
+formal definition: provides a surrogate or placeholder for another object to control access to it.
+
+note: when you want to add logger to a class, it is a good idea to create a seperate class for its logger, since adding logger as a method to the predefined class would violate Single Responsibility Principle.
+
+client: the object that is using the proxy.
+
+RMI: Remote Method Invocation which is a special feature of java, allowing you to call methods on objects that live outside of current JVM. in RMI, arguments and return values must be either primitive or Serializable.
+
+note: in java, one interface is allowed to "extend" another interface.
+
+"stub" is the object which acts as the proxy on client side, and "skeleton" is the object that stubs connects to on the server. (RMI nomenclature: in RMI, the client helper is a “stub” and the service helper is a “skeleton.”)
+
+remote proxy: representative of an object which lives in another JVM
+virtual proxy: representative of an object which is expensive to create(example: download image from internet)
+protection proxy: controls access to an object based on access rights.
+dynamic proxy: a way of implementing any of the proxies above.
+
+note:  a decorator adds behavior to a class, while a proxy controls access to it. but both implement the same interface as the subject.
+
+a common way to make client use proxy instead of real object is to use factory method. factory method returns the proxy and client doesn't care what the factory returns, since proxy and real object implement the same interface.
+
+note: Both Proxy and Adapter sit in front of other objects and forward requests to them, but Adapter changes the interface of the objects it adapts, while Proxy implements the same interface.
+
+
+================================================================
+twelveth chapter: compound patterns
+
+note: creating an object inside a function instead of passing the object to the function, creates dependancy between two objects. that's why we use dependency injection to decrease coupling between objects.
+
+note: decorator and factory patterns are a common use since client might forget to use the decorator. we provide a factory so that client only uses the result without being worry of adding the decorator.
+
+note:both the factory and strategy solve the problem of varying behavior for an object, strategy makes it interchangable at runtime and facotry makes it interchangable at construction time. examples:
+	strategy:
+		checkout.setPaymentStrategy(new PayPalPayment());
+		checkout.pay();
+	factory:
+		Payment p = PaymentFactory.create(config.get("paymentType"));
+		p.pay();
+
+note: in observer pattern, instead of having each subject implement the same 3 functions(regObs, remObs, notify), we can create a class "Observable" and assign each subject an Observable attribute and delegate the 3 mentioned functions to the observable attribute. -> "composition + delegation" is a valid substitute for inheritance.
+
+MVC keypoints: 
+	1- Controller Observers Model -> observer pattern
+	2- View Observers Model -> observer pattern
+	3- Controller is an Strategy for View -> strategy pattern
+	4- View elements are composite -> composite pattern
+
+note: if you see "class A extends B extends C extends D" or "class A extends B but overrides half the methods" it is a good sign that inheritance is being abused and composition would be a better choice.
+
+note: "favor composition over inheritance" respects single responsibility principle.
+
+in MVC, View need Model to read its state, and needs Controller to send user events, so it is normal to get both model and controller at construction time of view.
+
+note: let's say we want to disable some menuItem as soon as a button is hit inside View. if we do that inside the function which invokes when button is hit, then View is controlling the application behavior. that's why, we need to:
+	1- implement a method in view, say, disableTheMenuItem()
+	2- call controller.buttonPressed() when button is pressed
+	3- in controller.buttonPressed(), call disableTheMenuItem()
+	this way, the controller is controlling the behavior of the application.
+
+note: in most cases, Abstract Factory creates objects on demand (like in the book, using "new" command). Having objects as attributes is less common and means the factory is also acting as a holder or cache.
+
+note: you should "favor composition over inheritance" because:
+	1- lower coupling, when inheriting, subclass is tightly coupled to the base class.
+	2- runtime change behavior, if using composition, it is possible to change the attribute at runtime.
+	3- easier testing
+
+note: class inheritance is true "IS-A", but interface inheritance is "HAS-A" is it is only promising a behavior.
+
+
+================================================================
+thirteen chapter: patterns in real world
+
+iterator -> structural, proxy -> structural, composite -> structural, adapter -> structural
+
+
+================================================================
+fourthinth chapter: other patterns
+
+=== Bridge pattern
+if both the implementation and abstraction are gonna change over time, we are gonna end up with (m * n) number of classes, m being number of abstractions and n being number of implementations.
+bridge pattern reduces this number to (m + n) by changing the relationship between abstraction and implementation from "IS-A" to "HAS-A".
+
+Use cases:
+    Abstraction and implementation both change over time
+    You want to avoid subclass explosion
+    You want to switch implementations at runtime
+
+The book says "Use Bridge when both abstraction and implementation vary." This is technically correct, but it’s oversimplified. The real condition is closer to "Use Bridge when you have two independent dimensions of variation that would otherwise cause subclass multiplication."
+
+overall, if abstraction keeps changing over time, it might mean one of the two things:
+	1- we might have missed an axis of change (in which case, the bridge pattern is handy)
+	2- abstraction itself is poorly defined (LSP or SRP might be violated.)
+
+=== Builder pattern
+Builder separates the construction of a complex object from its representation, letting you build the same object step‑by‑step with different configurations.
+
+builder stops anti-pattern "telescoping constructor" from happening.
+
+most functions in builder return "self" to support "method chaining"(also called "fluent interface"). at the end, the result will be available by calling .build() method.
+
+use cases:
+	object has many parameters which some might be optional.
+	construction requires validation.
+	you need step-by-step construction.
+
+we only need builder interface if we want to allow multiple interchangeable builders producing different representations using the same build steps (usually via a Director).
+
+downside: Constructing objects requires more domain knowledge of the client than when using a Factory
+
+=== Chain of Repsonsibility pattern
+decouples the relation between client and handlers if there are multiple handlers for a request.
+
+use case: when you want a request to travel through a flexible, decoupled sequence of handlers, where each handler can choose to process it, modify it, or stop the chain entirely.
+
+=== Flyweight pattern
+separates object's state into:
+	1- Intrinsic state: shared, stored once
+	2- Extrinsic state: unique
+
+flyweight is the part which contains Intrinsic state
+
+use cases:
+	You have very large numbers of objects.
+	Objects contain a lot of duplicated data.
+	Memory consumption is becoming a problem.
+
+flyweight reduces memory but increases complexity.
+
+components:
+	flyweight interface
+	concrete flyweight
+	flyweight factory -> if not created before, creates and returns the object
+	client
+
+=== Interpreter pattern
+useful for interpreting simple languages and sentences
+
+Each rule in the language grammar becomes a class and Each class knows how to interpret itself.
+
+=== Mediator pattern
+reduces direct coupling between components through a central mediator object.
+
+useful when lots of object needs to call each other, A calls B, B calls C, etc.
+
+must be aware to not accidentally create a "God object" with this pattern.
+
+with adding new rules between components, might break OCP, but trades OCP with loose coupling of objects.
+
+observer pattern is about event broadcasting but mediator is about coordination + decision making.
+
+if we have n components, can reduce number of connections between components from O(n^2) to O(n).
+
+=== Memento pattern
+for storing state of an object so we can return back to it later.
+
+components:
+	originator: object whose state you want to store
+	memento: the object which stores the internal state of the originator
+	caretaker: responsible for managing mementos, cannot access mementos directly or modify them
+
+=== Prototype pattern
+useful when creating an instance of a class is expensive or complicated and we need a lot of instances -> allows to create new instances by copying existing ones.
+
+=== Visitor pattern
+when you want to add many operations to some structure of data over time.
+
+uses "double dispatch" since behavior is dependant on both "element type" and "visitor type".
+
+components: 
+	1- Element interface (accept() method)
+	2- concrete elements
+	3- visitor interface (visit() method, one for each concrete element) -> visitor is good for situations that new concrete elements are not likely to happen.
+	4- concrete visitors
+	
+each concrete visitor represents a new operation done on elements.
+
+Best suited for systems where: the object structure is stable but operations on those objects keep growing.
